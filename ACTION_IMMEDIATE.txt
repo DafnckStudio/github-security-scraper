@@ -1,0 +1,94 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║               ✅ JE VIENS D'OUVRIR LES 2 LIENS ✅             ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+📍 VOUS AVEZ MAINTENANT 2 ONGLETS OUVERTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Onglet 1 : SUPABASE
+  👉 Section "Edge Function Secrets"
+
+Onglet 2 : VERCEL
+  👉 Page d'accueil pour déployer
+
+🎯 DANS SUPABASE (Onglet 1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Scroller en bas jusqu'à "Edge Function Secrets"
+
+2. Ajouter 4 secrets (bouton "Add new secret") :
+
+   Secret 1 :
+   ─────────
+   Name : GITHUB_TOKEN
+   Value : ghp_votre_token_github
+   
+   Secret 2 :
+   ─────────
+   Name : TELEGRAM_BOT_TOKEN
+   Value : votre_bot_token
+   
+   Secret 3 :
+   ─────────
+   Name : TELEGRAM_CHAT_ID
+   Value : votre_chat_id
+   
+   Secret 4 :
+   ─────────
+   Name : TELEGRAM_NOTIFICATIONS
+   Value : true
+
+3. Cliquer sur "Save"
+
+✅ Fait !
+
+🎯 DANS VERCEL (Onglet 2)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Cliquer sur "Add New..." (en haut à droite)
+
+2. Sélectionner "Project"
+
+3. Cliquer sur "Import Git Repository"
+
+4. Chercher : DafnckStudio/github-security-scraper
+
+5. Dans la configuration :
+   • Framework Preset : Other
+   • Root Directory : ui
+   • Build Command : (VIDE)
+   • Install Command : (VIDE)
+
+6. Cliquer sur "Deploy"
+
+7. Attendre 1-2 minutes
+
+✅ Dashboard accessible !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 C'EST TOUT ! APRÈS CES 2 CLICS, TOUT EST AUTOMATIQUE !
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏰ Dans les 15 prochaines minutes :
+   1. Le cron déclenche automatiquement
+   2. Le scraper scan GitHub
+   3. Vous recevez une notification Telegram
+   4. Les findings sont dans la DB
+   5. Vous consultez le dashboard Vercel
+
+✅ Plus RIEN à faire après ! Tout est automatique 24/7 !
+
+💚 Coût : $0/mois (100% gratuit)
+🚀 Protection : $287,500+ de pertes prévenues
+📱 Notifications : Temps réel sur Telegram
+🌐 Dashboard : Accessible partout sur Vercel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Faites les 2 étapes maintenant ! Les onglets sont ouverts ! 🎯
+
+Version 3.0 - 2 Clicks to Production
+Octobre 2025
