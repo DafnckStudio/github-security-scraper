@@ -671,23 +671,8 @@ Avec fonds : ${fundedCount}
 Durée      : ${duration}s
 \`\`\`
 
-⏰ *SCAN CONTINU ACTIVÉ*
-🔄 Prochain scan : Dans 30 secondes
+⏰ Prochain scan : Dans 1 minute (automatique)
     `.trim(), CHAT_ID_ALL);
-
-    // AUTO-TRIGGER : Déclencher le prochain scan après 30 secondes
-    // Cela créé un scan quasi-continu
-    setTimeout(async () => {
-      try {
-        await fetch('https://nykctocknzbstdqnfkun.supabase.co/functions/v1/scraper-worker', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ auto: true }),
-        });
-      } catch (e) {
-        console.error('Auto-trigger error:', e);
-      }
-    }, 30000); // 30 secondes
 
     return new Response(
       JSON.stringify({ success: true, findingsCount, fundedCount, totalResults }),
