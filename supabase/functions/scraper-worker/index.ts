@@ -300,7 +300,10 @@ serve(async (req) => {
       // LOG: Results
       await sendTelegram(`📊 *${searchData.items?.length || 0} résultats* trouvés\n🔍 Analyse...`, CHAT_ID_ALL);
 
-      for (const item of searchData.items || []) {
+      // Limiter à 10 items par query pour éviter les timeouts
+      const itemsToProcess = (searchData.items || []).slice(0, 10);
+      
+      for (const item of itemsToProcess) {
         try {
           const contentRes = await fetch(
             `https://api.github.com/repos/${item.repository.full_name}/contents/${item.path}`,
@@ -580,9 +583,9 @@ ${fileContent}
                   blockchain = '⚫ OKX Exchange';
                 }
 
-                // ANALYSE IA du danger
-                await sendTelegram(`🤖 *Analyse IA en cours...*`, CHAT_ID_FUNDED);
-                const aiAnalysis = await analyzeWithAI(pattern.pattern_type, fullKey, content, blockchain);
+                // ANALYSE IA du danger (désactivée temporairement pour performance)
+                // await sendTelegram(`🤖 *Analyse IA en cours...*`, CHAT_ID_FUNDED);
+                const aiAnalysis = ''; // await analyzeWithAI(pattern.pattern_type, fullKey, content, blockchain);
 
                 // Message SIMPLE et BRUT avec IA
                 let fundedMsg = '';
