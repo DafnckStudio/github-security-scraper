@@ -1,0 +1,141 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║     ✅  BONUS : +8 PATTERNS ADRESSES CRYPTO  ✅               ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+🎉 8 NOUVEAUX PATTERNS AJOUTÉS POUR LES ADRESSES PUBLIQUES !
+
+📊 NOUVEAU TOTAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  41 patterns → 49 patterns (+19% d'amélioration !)
+
+🆕 PATTERNS ADRESSES AJOUTÉS (8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🪙 Bitcoin (5 patterns)
+  ✓ BITCOIN_ADDRESS_P2PKH      (Legacy - commence par 1)
+  ✓ BITCOIN_ADDRESS_P2SH        (P2SH - commence par 3)
+  ✓ BITCOIN_ADDRESS_BECH32      (SegWit - commence par bc1)
+  ✓ BTC_ADDRESS                 (Générique - tous formats)
+  ✓ HARDCODED_BITCOIN_ADDRESS   (Hardcodé dans le code)
+
+💎 Ethereum (1 pattern)
+  ✓ HARDCODED_ETH_ADDRESS       (Adresse 0x hardcodée)
+
+🌟 Solana (2 patterns)
+  ✓ SOLANA_ADDRESS              (Adresse Solana publique)
+  ✓ SOL_ADDRESS                 (Adresse SOL publique)
+
+📊 RÉPARTITION PAR SÉVÉRITÉ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  🔴 Critical : 34 patterns (clés privées, seeds)
+  🟠 High     : 6 patterns  (API keys, credentials)
+  🟡 Medium   : 2 patterns  (adresses hardcodées)
+  🟢 Low      : 7 patterns  (adresses publiques en variables)
+
+⚠️  IMPORTANT : ADRESSES ≠ CLÉS PRIVÉES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────┬──────────────┬──────────┬─────────────────┐
+│ Type            │ Confidentiel │ Sévérité │ Risque          │
+├─────────────────┼──────────────┼──────────┼─────────────────┤
+│ Clés Privées    │ 🔴 SECRET    │ CRITICAL │ Vol de fonds    │
+│ Adresses        │ 🟢 PUBLIC    │ LOW      │ Traçabilité     │
+└─────────────────┴──────────────┴──────────┴─────────────────┘
+
+Les adresses Bitcoin/Ethereum/Solana sont PUBLIQUES et peuvent 
+être partagées. On les détecte pour :
+
+  1. Identifier les adresses hardcodées (mauvaise pratique)
+  2. Tracer les projets crypto
+  3. Analyser les patterns d'utilisation
+  4. Audits de sécurité et conformité
+
+🎯 POURQUOI C'EST UTILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Détection de Mauvaises Pratiques
+   Exemple : const address = "1A1zP1eP...";  // ❌ Hardcodé
+   Meilleur : const address = process.env.BTC_ADDRESS;
+
+✅ Identification de Projets Crypto
+   Savoir quelles blockchains sont utilisées
+
+✅ Audit et Conformité
+   Tracer toutes les adresses dans le code
+
+✅ Analyse de Flux
+   Comprendre les transactions et les patterns
+
+🔍 EXEMPLES DE DÉTECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bitcoin Legacy (P2PKH)
+  BITCOIN_ADDRESS=1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+  ✅ Détecté - Sévérité: LOW
+
+Bitcoin SegWit (Bech32)
+  BTC_ADDRESS=bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+  ✅ Détecté - Sévérité: LOW
+
+Bitcoin Hardcodé
+  const addr = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
+  ⚠️  Détecté - Sévérité: MEDIUM (mauvaise pratique)
+
+Ethereum
+  ETH_ADDRESS=0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+  ✅ Détecté - Sévérité: LOW
+
+Solana
+  SOLANA_ADDRESS=7EqQdEULxWcraVx3mXKFjc84LhCkMGZCkRuDpvcMwJeK
+  ✅ Détecté - Sévérité: LOW
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  📄 docs/BITCOIN_ADDRESSES.md  ← Guide complet (NOUVEAU)
+  📄 docs/PATTERNS_LIST.md      ← Liste complète patterns
+  📄 UPGRADE_NOTICE.md          ← Notes de version
+
+🎯 PROCHAINES ÉTAPES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  Lire la documentation :
+    cat docs/BITCOIN_ADDRESSES.md
+
+2️⃣  Vérifier les patterns :
+    npm run verify
+    → Devrait afficher "49 active patterns"
+
+3️⃣  Tester avec un scan :
+    npm run scraper:start
+
+4️⃣  Voir dans le dashboard :
+    cd ui && python3 -m http.server 8000
+    Filtrer par "wallet_address" pour voir les adresses
+
+💡 CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si vous voulez désactiver la détection d'adresses :
+
+  -- Via Supabase SQL
+  UPDATE github_sensitive_patterns
+  SET is_active = false
+  WHERE pattern_type = 'wallet_address';
+
+Ou garder uniquement les adresses hardcodées (MEDIUM) :
+
+  UPDATE github_sensitive_patterns
+  SET is_active = false
+  WHERE pattern_type = 'wallet_address' AND severity = 'low';
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 Total : 49 patterns actifs ! Bon scanning ! 🪙
+
+Version 2.1 - Address Detection
+Octobre 2025

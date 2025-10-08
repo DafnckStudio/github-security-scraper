@@ -1,0 +1,49 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                 TELEGRAM BOT SETUP STATUS                         ║
+╚══════════════════════════════════════════════════════════════════╝
+
+✅ COMPLETED:
+  ✓ .env file created
+  ✓ Telegram bot token configured
+  ✓ Bot verified: GitFinder (@Gitfinderbot)
+  ✓ Helper scripts installed
+  ✓ Setup documentation created
+
+⚠️  REMAINING STEPS (5 minutes):
+
+1️⃣  INTERACT WITH BOT
+   → Open Telegram app
+   → Search for: @Gitfinderbot
+   → Send any message (e.g., "hello" or "/start")
+
+2️⃣  GET CHAT ID
+   → Run: npm run get-chat-id
+
+3️⃣  UPDATE .ENV
+   → Add the Chat ID shown by the script to .env file
+
+4️⃣  TEST CONNECTION
+   → Run: npm run scraper:start
+   → You should receive a test notification!
+
+═══════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION:
+   • Quick Guide: TELEGRAM_QUICK_SETUP.md
+   • Full Guide: docs/TELEGRAM_SETUP.md
+
+🛠️  COMMANDS:
+   npm run get-chat-id      → Get your Telegram Chat ID
+   npm run scraper:start    → Test the bot (one-time scan)
+   npm run scraper:continuous → Run continuous monitoring
+   npm run verify           → Verify entire setup
+
+═══════════════════════════════════════════════════════════════════
+
+🤖 BOT DETAILS:
+   Name: GitFinder
+   Username: @Gitfinderbot
+   Token: Configured ✓
+   Status: Ready (awaiting Chat ID)
+
+═══════════════════════════════════════════════════════════════════
