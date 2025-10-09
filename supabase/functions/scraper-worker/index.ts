@@ -233,9 +233,9 @@ serve(async (req) => {
       // LOG: Query start
       await sendTelegram(`🔎 *Recherche:* \`${query}\`\n⏳ En cours...`, CHAT_ID_ALL);
 
-      // Recherche avec PAGINATION pour avoir plus de résultats (max 100 par query)
+      // Recherche GitHub avec tri par date récente
       const searchRes = await fetch(
-        `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=100&sort=indexed&order=desc`,
+        `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=30&sort=indexed&order=desc`,
         { headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' } }
       );
 
@@ -255,8 +255,8 @@ serve(async (req) => {
       // LOG: Results
       await sendTelegram(`📊 *${searchData.items?.length || 0} résultats* trouvés\n🔍 Analyse...`, CHAT_ID_ALL);
 
-      // Limiter à 10 items par query pour éviter les timeouts
-      const itemsToProcess = (searchData.items || []).slice(0, 10);
+      // Limiter à 30 items par query pour plus de résultats
+      const itemsToProcess = (searchData.items || []).slice(0, 30);
       
       for (const item of itemsToProcess) {
         try {
